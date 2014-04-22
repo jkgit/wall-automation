@@ -47,6 +47,7 @@ import java.io.FileNotFoundException;
 public class WallController {
 
 	private SimpleLIRCClient client;
+	private SocketListener socket;
 	private GpioPinDigitalOutput upPin;
 	private GpioPinDigitalOutput downPin;
 	private WallOperation runningOperation;
@@ -69,6 +70,10 @@ public class WallController {
 
 		System.out.println("Adding remote listener...");
 		client.addIRActionListener(new RemoteListener());
+		
+		System.out.println("Listening on port 5000...");
+		// open a udp socket to accept tcp-ip requests (could do this on port 80? to provide api?)
+		socket = new SocketListener();
 
 		System.out.println("Finished initialization of WallController");
 	}
@@ -79,10 +84,43 @@ public class WallController {
 		System.exit(0);
 	}
 
+	private class SocketListener {
+		byte[] receive_data = new byte[1024];
+         	byte[] send_data = new byte[1024];
+         
+         	int recv_port;
+         
+         	DatagramSocket server_socket = new DatagramSocket(5000);
+         
+         	System.out.println ("UDPServer Waiting for client on port 5000");
+              
+         	while(true) {
+          		DatagramPacket receive_packet = new DatagramPacket(receive_data,
+                                              receive_data.length);
+                                              
+                  	server_socket.receive(receive_packet);
+                  
+                  	String command = new String(receive_packet.getData(),0,0
+                                           ,receive_packet.getLength());
+                  
+                  	InetAddress IPAddress = receive_packet.getAddress();
+                  	recv_port = receive_packet.getPort();
+                  
+                  	System.out.println("Received:" + command);
+			new Throwable().printStackTrace();
+			if (command.equals("UP")) {
+				startOperation(upPin);
+			} else if (command.equals("DOWN")) {
+				startOperation(downPin);
+			}
+			System.out.println("Finished:" + command);
+      		}
+	}
+	
 	private class RemoteListener implements IRActionListener{
 		public void action(String command){
 			System.out.println("Received:" + command);
-new Throwable().printStackTrace();
+			new Throwable().printStackTrace();
 			if (command.equals("UP")) {
 				startOperation(upPin);
 			} else if (command.equals("DOWN")) {
