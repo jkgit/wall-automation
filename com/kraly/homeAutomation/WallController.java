@@ -50,7 +50,7 @@ import java.io.FileNotFoundException;
 public class WallController {
 
 	private SimpleLIRCClient client;
-	private SocketListener socket;
+	private SocketListener socketListener;
 	private GpioPinDigitalOutput upPin;
 	private GpioPinDigitalOutput downPin;
 	private WallOperation runningOperation;
@@ -76,8 +76,8 @@ public class WallController {
 		
 		System.out.println("Listening on port 5000...");
 		// open a udp socket to accept tcp-ip requests (could do this on port 80? to provide api?)
-		socket = new SocketListener();
-		socket.listen();
+		socketListener = new SocketListener();
+		socketListener.listen();
 		
 		System.out.println("Finished initialization of WallController");
 	}
