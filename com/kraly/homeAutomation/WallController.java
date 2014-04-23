@@ -91,41 +91,55 @@ public class WallController {
 	private class SocketListener implements Runnable {
 		Thread listenerThread = null;
 		
-		public listen() {
-			listenerThread = new Thread(this).start();
+		public void listen() {
+			Thread listenerThread = new Thread(this);
+			listenerThread.start();
 		}
 		
-		public run() {
+		public void run() {
+			// socket code samples from http://www.prasannatech.net/2008/07/socket-programming-tutorial.html
 			byte[] receive_data = new byte[1024];
 	         	byte[] send_data = new byte[1024];
 	         
 	         	int recv_port;
+	        
+			try { 
+		         	DatagramSocket server_socket = new DatagramSocket(5000);
 	         
-	         	DatagramSocket server_socket = new DatagramSocket(5000);
-	         
-	         	System.out.println ("UDPServer Waiting for client on port 5000");
+		         	System.out.println ("UDPServer Waiting for client on port 5000");
 	              
-	         	while(true) {
-	          		DatagramPacket receive_packet = new DatagramPacket(receive_data,
+		         	while(true) {
+		          		DatagramPacket receive_packet = new DatagramPacket(receive_data,
 	                                              receive_data.length);
-	                                              
-	                  	server_socket.receive(receive_packet);
+	        
+					try {                                      
+			                  	server_socket.receive(receive_packet);
 	                  
-	                  	String command = new String(receive_packet.getData(),0,0
+			                  	String command = new String(receive_packet.getData(),0,0
 	                                           ,receive_packet.getLength());
 	                  
-	                  	InetAddress IPAddress = receive_packet.getAddress();
-	                  	recv_port = receive_packet.getPort();
+			                  	InetAddress IPAddress = receive_packet.getAddress();
+			                  	recv_port = receive_packet.getPort();
 	                  
-	                  	System.out.println("Received:" + command);
-				new Throwable().printStackTrace();
-				if (command.equals("UP")) {
-					startOperation(upPin);
-				} else if (command.equals("DOWN")) {
-					startOperation(downPin);
+			                  	System.out.println("Received:" + command);
+						new Throwable().printStackTrace();
+						if (command.equals("UP")) {
+							startOperation(upPin);
+						} else if (command.equals("DOWN")) {
+							startOperation(downPin);
+						}
+						System.out.println("Finished:" + command);
+					}
+					catch (IOException e) {
+						System.out.println("Couldn't receive data from packet");
+						e.printStackTrace();
+					}
 				}
-				System.out.println("Finished:" + command);
 	      		}
+			catch (SocketException e) {
+				System.out.println("Couldn't open datagram socket on port 5000, not listening to socket.");
+				e.printStackTrace();
+			}
 		}
 	}
 	
